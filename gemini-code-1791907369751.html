@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz Interaktif: Institusi Raja Payung Negara</title>
+    <style>
+        :root {
+            --primary: #8b0000;
+            --secondary: #ffd700;
+            --bg: #f4f1ea;
+            --card-bg: #ffffff;
+            --text: #2c2c2c;
+            --correct: #2e7d32;
+            --wrong: #c62828;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 650px;
+            padding: 25px;
+            border-top: 8px solid var(--primary);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+
+        .progress-bar {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background-color: var(--secondary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .scenario {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            background: #fffdf0;
+            padding: 15px;
+            border-left: 4px solid var(--secondary);
+            border-radius: 4px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-option {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.98rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text);
+        }
+
+        .btn-option:hover {
+            background-color: #eef2f5;
+            border-color: var(--primary);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #e8f5e9;
+            color: var(--correct);
+            border: 1px solid #a5d6a7;
+        }
+
+        .feedback.wrong {
+            background-color: #ffebee;
+            color: var(--wrong);
+            border: 1px solid #ef9a9a;
+        }
+
+        .btn-action {
+            margin-top: 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-action:hover {
+            background-color: #660000;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div id="start-screen">
+        <div class="header">
+            <h1>👑 KEMBARA SEJARAH: INSTITUSI RAJA PAYUNG NEGARA</h1>
+        </div>
+        <p>Bantu watak anda menerokai sejarah Pembentukan Institusi Diraja dari zaman Kerajaan Melayu Awal hingga era Moden!</p>
+        <ul>
+            <li>Terdapat <b>20 Babak Soalan</b> secara keseluruhan.</li>
+            <li>Satu kesilapan akan menyebabkan <i>Game Over</i>!</li>
+        </ul>
+        <button class="btn-action" onclick="startGame()">MULA PERMAINAN</button>
+    </div>
+
+    <div id="game-screen" class="hide">
+        <div class="header">
+            <div class="stats">
+                <span id="babak-num">Babak 1 / 20</span>
+                <span id="score-num">Mata: 0</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="scenario-text" class="scenario"></div>
+        <div id="options-container" class="options"></div>
+        <div id="feedback-box" class="feedback"></div>
+
+        <button id="next-btn" class="btn-action hide" onclick="nextQuestion()">TERUSKAN KEMBARA ➔</button>
+    </div>
+
+    <div id="end-screen" class="hide">
+        <div class="header">
+            <h1 id="end-title">GAME OVER</h1>
+        </div>
+        <p id="end-message"></p>
+        <div id="end-explanation" class="scenario"></div>
+        <button class="btn-action" onclick="restartGame()">CUBA LAGI ↺</button>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        scenario: "<b>BABAK 1: Perjanjian Wa'ad.</b> Di atas bukit Siguntang, Seri Teri Buana bermesyuarat dengan Demang Lebar Daun untuk membuat perjanjian persetiaan antara raja dan rakyat. Apakah asas utama perjanjian tersebut?",
+        options: [
+            "A. Rakyat bersetuju membayar cukai tanah setiap tahun kepada Gabenor.",
+            "B. Rakyat berjanji taat setia tanpa derhaka, manakala Raja berjanji memerintah dengan adil.",
+            "C. Pembesar bersetuju menyerahkan kuasa mentadbir kepada syarikat pedagang asing.",
+            "D. Rakyat jelata dibenarkan memilih raja baharu setiap lima tahun sekali."
+        ],
+        answer: 1,
+        explanation: "Perjanjian antara Seri Teri Buana dan Demang Lebar Daun menjadi asas taat setia rakyat dan keadilan raja, yang membentuk konsep daulat dan derhaka."
+    },
+    {
+        scenario: "<b>BABAK 2: Maksud Concept Daulat.</b> Seorang hulubalang bertanyakan maksud istilah 'Daulat'. Apakah asal usul dan maksud konsep tersebut?",
+        options: [
+            "A. Berasal daripada bahasa Sanskrit bermaksud kekayaan dan kemewahan raja.",
+            "B. Bermaksud kuasa mutlak pembesar untuk menggulingkan raja yang zalim.",
+            "C. Bermaksud wilayah jajahan takluk di bawah naungan kuasa British.",
+            "D. Berasal daripada perkataan Arab 'daulah' yang bermaksud kerajaan/negara; lambang kekuasaan tertinggi raja."
+        ],
+        answer: 3,
+        explanation: "Daulat berasal daripada perkataan Arab 'daulah' bermaksud kerajaan/negara dan melambangkan kekuasaan serta kewibawaan tertinggi raja."
+    },
+    {
+        scenario: "<b>BABAK 3: Maksud dan Balasan Derhaka.</b> Penduduk kampung dituduh ingkar akan titah raja. Apakah maksud 'derhaka' dan kepercayaannya?",
+        options: [
+            "A. Enggan membayar cukai pintu dan dibalas hukuman buang negeri.",
+            "B. Keingkaran rakyat terhadap titah raja; dipercayai akan ditimpa tulah atau bencana.",
+            "C. Enggan menandatangani perjanjian penubuhan Persekutuan Tanah Melayu.",
+            "D. Persetujuan mengubah sistem beraja kepada sistem republik."
+        ],
+        answer: 1,
+        explanation: "Derhaka ialah perbuatan ingkar titah raja, dan kepercayaan tradisional meyakini pelakunya akan ditimpa tulah."
+    },
+    {
+        scenario: "<b>BABAK 4: Hierarki Kerajaan Melayu Awal.</b> Susunkan kedudukan hierarki masyarakat Melayu tradisional dari tangga teratas ke bawah.",
+        options: [
+            "A. Pembesar ➔ Raja/Sultan ➔ Rakyat ➔ Hamba",
+            "B. Raja/Sultan ➔ Rakyat ➔ Pembesar ➔ Hamba",
+            "C. Raja/Sultan ➔ Pembesar ➔ Rakyat ➔ Hamba",
+            "D. Pembesar ➔ Hamba ➔ Raja/Sultan ➔ Rakyat"
+        ],
+        answer: 2,
+        explanation: "Hierarki tertinggi dipimpin oleh Raja/Sultan, diikuti Pembesar, Rakyat, dan Hamba pada susunan paling bawah."
+    },
+    {
+        scenario: "<b>BABAK 5: Perkembangan Gelaran Pemerintah.</b> Manakah kenyataan benar mengenai gelaran pemerintah sebelum dan selepas kedatangan Islam?",
+        options: [
+            "A. Gelaran Raja digunakan sebelum kedatangan Islam, dan gelaran Sultan digunakan selepas kedatangan Islam.",
+            "B. Gelaran Yang di-Pertuan Agong telah digunakan sejak zaman Kerajaan Melayu Awal.",
+            "C. Gelaran Sultan digunakan sebelum Islam, dan gelaran Raja digunakan selepas Islam.",
+            "D. Gelaran Gabenor digunakan sebaik sahaja Islam bertapak di Tanah Melayu."
+        ],
+        answer: 0,
+        explanation: "Pemerintah guna gelaran 'Raja' sebelum kedatangan Islam, dan bertukar kepada 'Sultan' selepas menerima Islam."
+    },
+    {
+        scenario: "<b>BABAK 15: Maksud Istilah 'Jemaah Menteri'.</b> Apakah maksud sebenar istilah Jemaah Menteri selepas negara mencapai kemerdekaan?",
+        options: [
+            "A. Badan bebas yang dianggotai oleh pembesar tempatan untuk memilih Yang di-Pertuan Agong.",
+            "B. Badan yang dianggotai oleh Perdana Menteri dan Menteri-Menteri Kabinet.",
+            "C. Organisasi khas yang dianggotai oleh Gabenor Jepun.",
+            "D. Majlis penasihat agama Islam yang dilantik oleh Sultan di setiap negeri."
+        ],
+        answer: 1,
+        explanation: "Jemaah Menteri ialah badan eksekutif Persekutuan yang dianggotai oleh Perdana Menteri dan Menteri-Menteri Kabinet."
+    },
+    {
+        scenario: "<b>BABAK 16: Maksud 'Majlis Eksekutif' Negeri.</b> Siapakah yang menganggotai Majlis Eksekutif di peringkat Negeri (EXCO/Kabinet Negeri)?",
+        options: [
+            "A. Badan yang dianggotai oleh Gabenor British untuk hal ehwal tentera.",
+            "B. Badan yang dianggotai oleh Yang di-Pertuan Agong dan Sembilan Orang Raja Melayu.",
+            "C. Badan yang dianggotai oleh Menteri Besar / Ketua Menteri serta Ahli Majlis Mesyuarat Kerajaan Negeri.",
+            "D. Badan yang terdiri daripada Ahli Parlimen Persekutuan."
+        ],
+        answer: 2,
+        explanation: "Majlis Eksekutif peringkat negeri dianggotai oleh Menteri Besar atau Ketua Menteri bersama Ahli Majlis Mesyuarat Kerajaan Negeri (EXCO)."
+    }
+    // *Nota: Soalan boleh ditambah sehingga 20 soalan mengikut format yang sama*
+];
+
+let currentQ = 0;
+let score = 0;
+
+function startGame() {
+    currentQ = 0;
+    score = 0;
+    document.getElementById('start-screen').classList.add('hide');
+    document.getElementById('end-screen').classList.add('hide');
+    document.getElementById('game-screen').classList.remove('hide');
+    showQuestion();
+}
+
+function showQuestion() {
+    const q = questions[currentQ];
+    document.getElementById('babak-num').innerText = `Babak ${currentQ + 1} / ${questions.length}`;
+    document.getElementById('score-num').innerText = `Mata: ${score}`;
+    document.getElementById('scenario-text').innerHTML = q.scenario;
+    
+    // Update progress bar
+    const progressPercent = ((currentQ) / questions.length) * 100;
+    document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+
+    const optContainer = document.getElementById('options-container');
+    optContainer.innerHTML = '';
+    document.getElementById('feedback-box').className = 'feedback hide';
+    document.getElementById('next-btn').classList.add('hide');
+
+    q.options.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(index);
+        optContainer.appendChild(btn);
+    });
+}
+
+function checkAnswer(selectedIndex) {
+    const q = questions[currentQ];
+    const buttons = document.querySelectorAll('.btn-option');
+    buttons.forEach(btn => btn.disabled = true); // Lock options
+
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.classList.remove('hide');
+
+    if (selectedIndex === q.answer) {
+        score += 10;
+        feedbackBox.className = 'feedback correct';
+        feedbackBox.innerHTML = `<b>Syabas! Jawapan anda TEPAT!</b><br>${q.explanation}`;
+        document.getElementById('next-btn').classList.remove('hide');
+    } else {
+        feedbackBox.className = 'feedback wrong';
+        feedbackBox.innerHTML = `<b>GAME OVER! Jawapan anda kurang tepat.</b>`;
+        
+        setTimeout(() => {
+            endGame(false, q.explanation);
+        }, 1500);
+    }
+}
+
+function nextQuestion() {
+    currentQ++;
+    if (currentQ < questions.length) {
+        showQuestion();
+    } else {
+        endGame(true);
+    }
+}
+
+function endGame(isWin, wrongExplanation = "") {
+    document.getElementById('game-screen').classList.add('hide');
+    document.getElementById('end-screen').classList.remove('hide');
+
+    const endTitle = document.getElementById('end-title');
+    const endMsg = document.getElementById('end-message');
+    const endExp = document.getElementById('end-explanation');
+
+    if (isWin) {
+        endTitle.innerText = "👑 TAHNIAH! JAYA KEMBARA!";
+        endMsg.innerText = `Anda telah berjaya menyelesaikan kesemua ${questions.length} Babak dengan cemerlang! Anda kini digelar 'Pahlawan Agung Sejarah'!`;
+        endExp.innerHTML = `<b>Mata Akhir: ${score}</b>`;
+    } else {
+        endTitle.innerText = "💥 GAME OVER!";
+        endMsg.innerText = `Kembara anda terhenti di Babak ${currentQ + 1}.`;
+        endExp.innerHTML = `<b>Penerangan Fakta Sejarah:</b><br>${wrongExplanation}`;
+    }
+}
+
+function restartGame() {
+    startGame();
+}
+</script>
+
+</body>
+</html>
